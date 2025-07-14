@@ -1,0 +1,140 @@
+table:
+  name: recipes
+  schema: public
+object_relationships:
+  - name: author
+    using:
+      foreign_key_constraint_on: author_id
+  - name: category
+    using:
+      foreign_key_constraint_on: category_id
+  - name: nutrition
+    using:
+      foreign_key_constraint_on:
+        column: recipe_id
+        table:
+          name: recipe_nutrition
+          schema: public
+array_relationships:
+  - name: images
+    using:
+      foreign_key_constraint_on:
+        column: recipe_id
+        table:
+          name: recipe_images
+          schema: public
+  - name: ingredients
+    using:
+      foreign_key_constraint_on:
+        column: recipe_id
+        table:
+          name: recipe_ingredients
+          schema: public
+  - name: steps
+    using:
+      foreign_key_constraint_on:
+        column: recipe_id
+        table:
+          name: recipe_steps
+          schema: public
+  - name: likes
+    using:
+      foreign_key_constraint_on:
+        column: recipe_id
+        table:
+          name: recipe_likes
+          schema: public
+  - name: bookmarks
+    using:
+      foreign_key_constraint_on:
+        column: recipe_id
+        table:
+          name: recipe_bookmarks
+          schema: public
+  - name: reviews
+    using:
+      foreign_key_constraint_on:
+        column: recipe_id
+        table:
+          name: recipe_reviews
+          schema: public
+  - name: ratings
+    using:
+      foreign_key_constraint_on:
+        column: recipe_id
+        table:
+          name: recipe_ratings
+          schema: public
+computed_fields:
+  - name: average_rating
+    definition:
+      function:
+        name: get_recipe_average_rating
+        schema: public
+  - name: likes_count
+    definition:
+      function:
+        name: get_recipe_likes_count
+        schema: public
+  - name: reviews_count
+    definition:
+      function:
+        name: get_recipe_reviews_count
+        schema: public
+  - name: views_count
+    definition:
+      function:
+        name: get_recipe_views_count
+        schema: public
+select_permissions:
+  - role: user
+    permission:
+      columns: "*"
+      filter:
+        _or:
+          - status: { _eq: "published" }
+          - author_id: { _eq: "X-Hasura-User-Id" }
+  - role: anonymous
+    permission:
+      columns: "*"
+      filter:
+        status: { _eq: "published" }
+insert_permissions:
+  - role: user
+    permission:
+      columns:
+        - title
+        - description
+        - featured_image
+        - prep_time
+        - cook_time
+        - servings
+        - difficulty
+        - cuisine_type
+        - price
+        - category_id
+      check:
+        author_id: { _eq: "X-Hasura-User-Id" }
+      set:
+        author_id: "X-Hasura-User-Id"
+update_permissions:
+  - role: user
+    permission:
+      columns:
+        - title
+        - description
+        - featured_image
+        - prep_time
+        - cook_time
+        - servings
+        - difficulty
+        - cuisine_type
+        - price
+        - status
+      filter:
+        author_id: { _eq: "X-Hasura-User-Id" }
+delete_permissions:
+  - role: user
+    permission:
+      filter:
+        author_id: { _eq: "X-Hasura-User-Id" }

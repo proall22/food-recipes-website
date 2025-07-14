@@ -1,0 +1,112 @@
+table:
+  name: users
+  schema: public
+object_relationships:
+  - name: recipes
+    using:
+      foreign_key_constraint_on:
+        column: author_id
+        table:
+          name: recipes
+          schema: public
+array_relationships:
+  - name: followers
+    using:
+      foreign_key_constraint_on:
+        column: following_id
+        table:
+          name: user_follows
+          schema: public
+  - name: following
+    using:
+      foreign_key_constraint_on:
+        column: follower_id
+        table:
+          name: user_follows
+          schema: public
+  - name: recipe_likes
+    using:
+      foreign_key_constraint_on:
+        column: user_id
+        table:
+          name: recipe_likes
+          schema: public
+  - name: recipe_bookmarks
+    using:
+      foreign_key_constraint_on:
+        column: user_id
+        table:
+          name: recipe_bookmarks
+          schema: public
+  - name: recipe_reviews
+    using:
+      foreign_key_constraint_on:
+        column: user_id
+        table:
+          name: recipe_reviews
+          schema: public
+computed_fields:
+  - name: recipe_count
+    definition:
+      function:
+        name: get_user_recipe_count
+        schema: public
+  - name: followers_count
+    definition:
+      function:
+        name: get_user_followers_count
+        schema: public
+  - name: following_count
+    definition:
+      function:
+        name: get_user_following_count
+        schema: public
+  - name: average_rating
+    definition:
+      function:
+        name: get_user_average_rating
+        schema: public
+select_permissions:
+  - role: user
+    permission:
+      columns:
+        - id
+        - email
+        - username
+        - first_name
+        - last_name
+        - bio
+        - avatar
+        - is_verified
+        - created_at
+      filter:
+        _or:
+          - id: { _eq: "X-Hasura-User-Id" }
+          - _exists:
+              _table:
+                name: recipes
+                schema: public
+              _where:
+                author_id: { _eq: "X-Hasura-User-Id" }
+  - role: anonymous
+    permission:
+      columns:
+        - id
+        - username
+        - first_name
+        - last_name
+        - bio
+        - avatar
+        - is_verified
+        - created_at
+      filter: {}
+update_permissions:
+  - role: user
+    permission:
+      columns:
+        - first_name
+        - last_name
+        - bio
+        - avatar
+      filter:
+        id: { _eq: "X-Hasura-User-Id" }

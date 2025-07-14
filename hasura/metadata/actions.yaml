@@ -1,0 +1,100 @@
+actions:
+  - name: signup
+    definition:
+      kind: synchronous
+      handler: http://golang-api:8000/auth/signup
+      forward_client_headers: true
+    permissions:
+      - role: anonymous
+    comment: User registration
+  - name: login
+    definition:
+      kind: synchronous
+      handler: http://golang-api:8000/auth/login
+      forward_client_headers: true
+    permissions:
+      - role: anonymous
+    comment: User authentication
+  - name: uploadImage
+    definition:
+      kind: synchronous
+      handler: http://golang-api:8000/upload/image
+      forward_client_headers: true
+    permissions:
+      - role: user
+    comment: Upload recipe images
+  - name: initializePayment
+    definition:
+      kind: synchronous
+      handler: http://golang-api:8000/payment/initialize
+      forward_client_headers: true
+    permissions:
+      - role: user
+    comment: Initialize recipe purchase
+  - name: verifyPayment
+    definition:
+      kind: synchronous
+      handler: http://golang-api:8000/payment/verify
+      forward_client_headers: true
+    permissions:
+      - role: user
+    comment: Verify payment status
+custom_types:
+  enums: []
+  input_objects:
+    - name: SignupInput
+      fields:
+        - name: email
+          type: String!
+        - name: username
+          type: String!
+        - name: first_name
+          type: String!
+        - name: last_name
+          type: String!
+        - name: password
+          type: String!
+        - name: bio
+          type: String
+        - name: avatar
+          type: String
+    - name: LoginInput
+      fields:
+        - name: email
+          type: String!
+        - name: password
+          type: String!
+    - name: PaymentInput
+      fields:
+        - name: recipe_id
+          type: uuid!
+        - name: amount
+          type: numeric!
+  objects:
+    - name: AuthResponse
+      fields:
+        - name: success
+          type: Boolean!
+        - name: message
+          type: String!
+        - name: access_token
+          type: String
+        - name: refresh_token
+          type: String
+        - name: user
+          type: users
+    - name: UploadResponse
+      fields:
+        - name: url
+          type: String!
+        - name: filename
+          type: String!
+    - name: PaymentResponse
+      fields:
+        - name: success
+          type: Boolean!
+        - name: message
+          type: String!
+        - name: checkout_url
+          type: String
+  scalars: []
