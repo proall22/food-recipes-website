@@ -39,7 +39,7 @@
           <div v-for="category in categories" :key="category.id" 
             class="group cursor-pointer" @click="navigateToCategory(category.slug)">
             <div class="relative overflow-hidden rounded-2xl aspect-square mb-3 group-hover:scale-105 transition-transform duration-300">
-              <img :src="category.image" :alt="category.name" 
+              <img :src="category.image || '/placeholder.svg?height=200&width=200'" :alt="category.name" 
                 class="w-full h-full object-cover" />
               <div class="absolute inset-0 bg-gradient-to-t from-black/50 to-transparent"></div>
               <div class="absolute bottom-3 left-3 text-white">
@@ -62,41 +62,13 @@
           </div>
           <NuxtLink to="/recipes" 
             class="text-orange-500 hover:text-orange-600 font-medium flex items-center">
-            View All <ChevronRight class="ml-1 h-4 w-4" />
+            View All 
+            <ChevronRightIcon class="ml-1 h-4 w-4" />
           </NuxtLink>
         </div>
 
         <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
           <RecipeCard v-for="recipe in featuredRecipes" :key="recipe.id" :recipe="recipe" />
-        </div>
-      </div>
-    </section>
-
-    <!-- Top Creators -->
-    <section class="py-16 bg-white">
-      <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div class="text-center mb-12">
-          <h2 class="text-3xl font-bold text-gray-900 mb-4">Top Creators</h2>
-          <p class="text-gray-600">Meet the talented home cooks sharing their best recipes</p>
-        </div>
-
-        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
-          <div v-for="creator in topCreators" :key="creator.id" 
-            class="text-center group cursor-pointer" @click="navigateToCreator(creator.id)">
-            <div class="relative mb-4">
-              <img :src="creator.avatar" :alt="creator.name" 
-                class="w-24 h-24 rounded-full mx-auto object-cover group-hover:scale-105 transition-transform" />
-              <div class="absolute -bottom-2 -right-2 bg-orange-500 text-white rounded-full p-2">
-                <Crown class="h-4 w-4" />
-              </div>
-            </div>
-            <h3 class="font-semibold text-gray-900 mb-1">{{ creator.name }}</h3>
-            <p class="text-gray-600 text-sm mb-2">{{ creator.recipeCount }} recipes</p>
-            <div class="flex items-center justify-center text-yellow-400">
-              <Star class="h-4 w-4 fill-current" />
-              <span class="ml-1 text-gray-600 text-sm">{{ creator.rating }}</span>
-            </div>
-          </div>
         </div>
       </div>
     </section>
@@ -128,74 +100,16 @@
 
 <script setup>
 import { ref, onMounted } from 'vue'
-import { ChevronRight, Crown, Star } from 'lucide-vue-next'
-import { navigateTo } from '#app'
-import { useHead } from '#head'
+import { ChevronRightIcon } from '@heroicons/vue/24/outline'
+
+const { getCategories, getRecipes } = useRecipes()
 
 const email = ref('')
-
-// Sample data - will be replaced with GraphQL queries
-const categories = ref([
-  { id: 1, name: 'Breakfast', slug: 'breakfast', count: 245, image: '/placeholder.svg?height=200&width=200' },
-  { id: 2, name: 'Lunch', slug: 'lunch', count: 189, image: '/placeholder.svg?height=200&width=200' },
-  { id: 3, name: 'Dinner', slug: 'dinner', count: 312, image: '/placeholder.svg?height=200&width=200' },
-  { id: 4, name: 'Desserts', slug: 'desserts', count: 156, image: '/placeholder.svg?height=200&width=200' },
-  { id: 5, name: 'Snacks', slug: 'snacks', count: 98, image: '/placeholder.svg?height=200&width=200' },
-  { id: 6, name: 'Beverages', slug: 'beverages', count: 67, image: '/placeholder.svg?height=200&width=200' }
-])
-
-const featuredRecipes = ref([
-  {
-    id: 1,
-    title: 'Creamy Mushroom Risotto',
-    description: 'A rich and creamy Italian classic with wild mushrooms',
-    image: '/placeholder.svg?height=300&width=400',
-    prepTime: 45,
-    difficulty: 'Medium',
-    rating: 4.8,
-    author: { name: 'Maria Rodriguez', avatar: '/placeholder.svg?height=40&width=40' },
-    likes: 234,
-    category: 'Dinner'
-  },
-  {
-    id: 2,
-    title: 'Chocolate Lava Cake',
-    description: 'Decadent individual chocolate cakes with molten centers',
-    image: '/placeholder.svg?height=300&width=400',
-    prepTime: 30,
-    difficulty: 'Easy',
-    rating: 4.9,
-    author: { name: 'James Wilson', avatar: '/placeholder.svg?height=40&width=40' },
-    likes: 456,
-    category: 'Desserts'
-  },
-  {
-    id: 3,
-    title: 'Mediterranean Quinoa Bowl',
-    description: 'Healthy and colorful bowl with fresh vegetables and herbs',
-    image: '/placeholder.svg?height=300&width=400',
-    prepTime: 25,
-    difficulty: 'Easy',
-    rating: 4.7,
-    author: { name: 'Sarah Chen', avatar: '/placeholder.svg?height=40&width=40' },
-    likes: 189,
-    category: 'Lunch'
-  }
-])
-
-const topCreators = ref([
-  { id: 1, name: 'Maria Rodriguez', recipeCount: 45, rating: 4.9, avatar: '/placeholder.svg?height=96&width=96' },
-  { id: 2, name: 'James Wilson', recipeCount: 38, rating: 4.8, avatar: '/placeholder.svg?height=96&width=96' },
-  { id: 3, name: 'Sarah Chen', recipeCount: 52, rating: 4.7, avatar: '/placeholder.svg?height=96&width=96' },
-  { id: 4, name: 'Ahmed Hassan', recipeCount: 29, rating: 4.8, avatar: '/placeholder.svg?height=96&width=96' }
-])
+const categories = ref([])
+const featuredRecipes = ref([])
 
 const navigateToCategory = (slug) => {
   navigateTo(`/categories/${slug}`)
-}
-
-const navigateToCreator = (id) => {
-  navigateTo(`/creators/${id}`)
 }
 
 const subscribeNewsletter = () => {
@@ -203,6 +117,18 @@ const subscribeNewsletter = () => {
   console.log('Subscribing email:', email.value)
   email.value = ''
 }
+
+onMounted(async () => {
+  try {
+    // Load categories
+    categories.value = await getCategories()
+    
+    // Load featured recipes
+    featuredRecipes.value = await getRecipes({ limit: 6 })
+  } catch (error) {
+    console.error('Error loading data:', error)
+  }
+})
 
 // SEO
 useHead({
